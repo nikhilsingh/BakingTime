@@ -81,5 +81,9 @@ public class BakingRecipe implements Parcelable {
 
     }
 
+    @Override
+    public String toString() {
+        return recipeStepList.toString()+recipeIngredientList.toString();
 
+    }
 }

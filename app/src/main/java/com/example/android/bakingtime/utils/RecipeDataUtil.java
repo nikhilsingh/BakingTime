@@ -18,6 +18,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
@@ -25,6 +26,7 @@ import java.util.ArrayList;
  */
 
 public class RecipeDataUtil {
+    public static final String TAG="RecipeDataUtil";
 
     public static ArrayList<BakingRecipe> getBakingRecipeObjFromJSON(String jsonString) throws JSONException, IOException {
 
@@ -182,13 +184,14 @@ public class RecipeDataUtil {
 
 
     public static BakingRecipe getBakingRecipeFromDB(int foodId, Context context) {
+        Log.i(TAG,"getBakingRecipeFromDB starts. Food Id "+foodId);
 
         BakingRecipe bakingRecipe = new BakingRecipe();
 
         bakingRecipe.setBakeFoodItem(getBakeFoodItemFromDB(foodId,context));
         bakingRecipe.setRecipeStepList(getRecipeStepListFromDB(foodId,context));
         bakingRecipe.setRecipeIngList(getRecipeIngredientFromDB(foodId,context));
-
+        Log.i(TAG,"baking recipe is "+bakingRecipe.toString());
         return bakingRecipe;
     }
 
@@ -275,5 +278,41 @@ public class RecipeDataUtil {
         stepCursor.close();
         return recipeStepList;
     }
+
+    public static ArrayList<BakeFoodItem> getAllFoodItemList(Cursor data){
+        ArrayList<BakeFoodItem> bakeFoodItemArrayList = new ArrayList<>();
+
+        if(data!=null && data.getCount() > 0){
+            data.moveToFirst();
+            do{
+                BakeFoodItem bakeFoodItem = new BakeFoodItem();
+
+                bakeFoodItem.setFoodItemId(data.getInt(data.getColumnIndex(BakingContract.FoodItem.COLUMN_FOOD_ID)));
+                bakeFoodItem.setFoodItemName(data.getString(data.getColumnIndex(BakingContract.FoodItem.COLUMN_FOOD_NAME)));
+
+
+                bakeFoodItemArrayList.add(bakeFoodItem);
+
+
+            }while (data.moveToNext());
+        }
+
+
+
+        return bakeFoodItemArrayList;
+
+    }
+
+    public static ArrayList<RecipeIngredient> getIngListForDetailIndex(BakingRecipe bakingRecipe){
+
+        return bakingRecipe.getRecipeIngList();
+    }
+
+    public static RecipeStep getStepForDetailIndex(int detailIndex,BakingRecipe bakingRecipe){
+        return bakingRecipe.getRecipeStepList().get(detailIndex-1);
+    }
+
+
+
 
 }

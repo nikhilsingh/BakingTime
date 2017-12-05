@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+  android:elevation="16dp"
+    android:background="@color/colorLight">
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2"
+        android:src="@drawable/ic_local_dining_black_72dp"
+        />
+    <TextView
+
+        android:id="@+id/tv_select_foodname"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight=".5"
+        tools:text="Nutela Pie"
+        android:textSize="24sp"
+        android:gravity="center"
+
+        android:fontFamily="cursive"
+        android:textStyle="bold"
+        />
+
+    <TextView
+        android:id="@+id/tv_select_serving"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight=".5"
+        android:paddingLeft="16dp"
+        android:textSize="16sp"
+        android:fontFamily="casual"
+        tools:text="Servings:2" android:gravity="start"/>
+</LinearLayout>

@@ -18,10 +18,16 @@ import com.example.android.bakingtime.data.BakingContract;
 public class SelectRecipeAdapter extends BaseAdapter {
     Context mContext;
     Cursor mData;
+    SelectRecipeOnClickHandler mClickHandler;
 
-    public SelectRecipeAdapter(Context context, Cursor data) {
+    public SelectRecipeAdapter(Context context, SelectRecipeOnClickHandler handler, Cursor data) {
         mContext=context;
         mData=data;
+        mClickHandler=handler;
+    }
+
+    public interface SelectRecipeOnClickHandler{
+        void onFoodSelected(int foodid);
     }
 
     @Override
@@ -44,14 +50,26 @@ public class SelectRecipeAdapter extends BaseAdapter {
         View gridItemView = convertView;
 
         if(gridItemView == null){
-            gridItemView = LayoutInflater.from(mContext).inflate(android.R.layout.simple_list_item_1,parent,false);
+            gridItemView = LayoutInflater.from(mContext).inflate(R.layout.griditem_selectrecipe,parent,false);
         }
-        TextView txtView = (TextView) gridItemView;
+
+        TextView foodNameTV =(TextView) gridItemView.findViewById(R.id.tv_select_foodname);
+        TextView servingsTV=(TextView) gridItemView.findViewById(R.id.tv_select_serving);
+
+
         mData.moveToPosition(position);
+        final int mFoodId=mData.getInt(mData.getColumnIndex(BakingContract.FoodItem.COLUMN_FOOD_ID));
 
-        txtView.setText(mData.getString(mData.getColumnIndex(BakingContract.FoodItem.COLUMN_FOOD_NAME)));
-        txtView.setBackgroundColor(0xfff0000);
+        foodNameTV.setText(mData.getString(mData.getColumnIndex(BakingContract.FoodItem.COLUMN_FOOD_NAME)));
+        servingsTV.setText("Servings : "+mData.getString(mData.getColumnIndex(BakingContract.FoodItem.COLUMN_SERVINGS)));
+        //gridItemView.setBackgroundColor(0xfff0000);
 
+        gridItemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mClickHandler.onFoodSelected(mFoodId);
+            }
+        });
 
         return gridItemView;
     }

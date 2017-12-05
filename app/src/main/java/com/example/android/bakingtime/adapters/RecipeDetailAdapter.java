@@ -1,11 +1,14 @@
 package com.example.android.bakingtime.adapters;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
+
+import com.example.android.bakingtime.R;
 
 import java.util.ArrayList;
 
@@ -17,14 +20,21 @@ public class RecipeDetailAdapter extends BaseAdapter {
     Context mContext;
     ArrayList<String> mData;
 
-    public RecipeDetailAdapter(Context context, ArrayList<String> detailShortDesc) {
+    public RecipeDetailAdapter(Context context) {
         mContext =context;
-        mData=detailShortDesc;
+
     }
 
     @Override
     public int getCount() {
+        if(mData==null){
+            return 0;
+        }
         return mData.size();
+    }
+    public void setDetailListData(ArrayList<String> data){
+        mData=data;
+        notifyDataSetChanged();
     }
 
     @Override
@@ -39,12 +49,15 @@ public class RecipeDetailAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        Log.i("RecipeDetailAdapter","adapter view position"+position);
         View listItemView=convertView;
         if(listItemView==null){
-            listItemView= LayoutInflater.from(mContext).inflate(android.R.layout.simple_list_item_1,parent,false);
+            listItemView= LayoutInflater.from(mContext).inflate(R.layout.listitem_recipe_details,parent,false);
         }
-        TextView tv = (TextView) listItemView;
-        tv.setText(mData.get(position));
+
+        TextView shortDescTV = (TextView) listItemView.findViewById(R.id.tv_item_shortDesc);
+
+        shortDescTV.setText(mData.get(position));
 
 
         return listItemView;

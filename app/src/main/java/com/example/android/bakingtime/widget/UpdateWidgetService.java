@@ -15,11 +15,11 @@ import com.example.android.bakingtime.R;
  * <p>
  * TODO: Customize class - update intent actions and extra parameters.
  */
-public class MyIntentService extends IntentService {
+public class UpdateWidgetService extends IntentService {
 
 
-    public MyIntentService() {
-        super("MyIntentService");
+    public UpdateWidgetService() {
+        super("UpdateWidgetService");
     }
 
     @Override

@@ -18,25 +18,27 @@
 
         </ListView>
 
-        <FrameLayout
+      <!--  <FrameLayout
+            android:id="@+id/"
             android:layout_width="340dp"
             android:layout_height="200dp"
             android:layout_margin="16dp">
 
-            <com.google.android.exoplayer2.ui.SimpleExoPlayerView
-                android:id="@+id/myexo_playerview"
+            <FrameLayout
+                android:id="@+id/videoplayer_container"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
 
+
             <ImageView
-                android:visibility="invisible"
                 android:id="@+id/novideo_image"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:src="@drawable/exo_controls_play" />
+                android:src="@drawable/exo_controls_play"
+                android:visibility="invisible" />
 
 
-        </FrameLayout>
+        </FrameLayout>-->
 
 
         <TextView

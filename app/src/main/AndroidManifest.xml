@@ -37,10 +37,13 @@
                 android:resource="@xml/ingredient_widget_provider_info" />
         </receiver>
 
-        <service android:name=".widget.MyIntentService"></service>
+        <service android:name=".widget.UpdateWidgetService" />
+        <service android:name=".sync.RecipeDataRemoteService" />
         <service
             android:name=".widget.ListWidgetService"
             android:permission="android.permission.BIND_REMOTEVIEWS" />
+
+        <activity android:name=".ui.ShowStepActivity"></activity>
     </application>
 
 </manifest>

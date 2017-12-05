@@ -2,4 +2,25 @@
     <string name="app_name">BakingTime</string>
     <string name="appwidget_text">EXAMPLE</string>
     <string name="add_widget">Add widget</string>
+
+
+    <!-- Shared Preference related strings  -->
+    <string name="pref_file_name">bakingprefs</string>
+    <string name="pref_key_dataloaded">dataloaded</string>
+    <string name="pref_key_foodid">foodid</string>
+
+
+    <!-- Intent related strings -->
+    <string name="intent_foodid"></string>
+    <string name="intent_bakingrecipeobj">bakingRecipeObject</string>
+    <string name="intent_recipedetail_position">position</string>
+
+
+    <!--Broadcast related   -->
+    <string name="broadcast_action_dataloaded">data-load-complete</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+
 </resources>

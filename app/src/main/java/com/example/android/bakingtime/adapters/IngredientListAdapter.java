@@ -56,4 +56,9 @@ public class IngredientListAdapter extends BaseAdapter {
 
         return gridItemView;
     }
+
+    public void updateListData(ArrayList<RecipeIngredient> list){
+        ingList=list;
+        notifyDataSetChanged();
+    }
 }

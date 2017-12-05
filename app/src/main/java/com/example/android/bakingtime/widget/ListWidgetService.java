@@ -27,6 +27,7 @@ class ListRemoteViewFactory implements RemoteViewsService.RemoteViewsFactory {
 
     Context mContext;
     Cursor mCursor;
+    int mFoodId;
 
     public ListRemoteViewFactory(Context context) {
         mContext = context;
@@ -42,10 +43,11 @@ class ListRemoteViewFactory implements RemoteViewsService.RemoteViewsFactory {
     public void onDataSetChanged() {
         Log.i("ListWidgetService", "onDataSetChanged called");
         SharedPreferences mSharedPref = mContext.getSharedPreferences("bakingprefs", Context.MODE_PRIVATE);
-        int foodId = mSharedPref.getInt("foodid", -1);
-        Log.i("widgetservice", "food id is" + foodId);
-        if (foodId > 0) {
-            String sFoodId = String.valueOf(foodId);
+        mFoodId = mSharedPref.getInt("foodid", -1);
+        Log.i("widgetservice", "food id is" + mFoodId);
+        if (mFoodId > 0) {
+
+            String sFoodId = String.valueOf(mFoodId);
             String mSelection = BakingContract.COMMON_COLUMN_FOODID + "=?";
             String[] mSelectionArgs = new String[]{sFoodId};
             mCursor = mContext.getContentResolver().query(BakingContract.Ingredient.CONTENT_URI, null, mSelection, mSelectionArgs, null);
@@ -73,6 +75,10 @@ class ListRemoteViewFactory implements RemoteViewsService.RemoteViewsFactory {
         Log.i("WidgetService", "ing text " + msg);
         RemoteViews views = new RemoteViews(mContext.getPackageName(), R.layout.listitem_ingredients);
         views.setTextViewText(R.id.item_ingdesc, msg);
+        Intent intent = new Intent();
+        intent.putExtra(mContext.getString(R.string.intent_foodid),mFoodId);
+        views.setOnClickFillInIntent(R.id.widget_listitem_parent,intent);
+
 
 
         return views;

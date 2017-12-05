@@ -142,6 +142,7 @@ public class BakingProvider extends ContentProvider {
     @Override
     public ContentProviderResult[] applyBatch(@NonNull ArrayList<ContentProviderOperation> operations) throws OperationApplicationException {
         final SQLiteDatabase db = mDBHelper.getWritableDatabase();
+
         db.beginTransaction();
         try {
             int operationsSize = operations.size();
@@ -161,6 +162,9 @@ public class BakingProvider extends ContentProvider {
 
     @Override
     public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] selectionArgs) {
+
+
+
         return 0;
     }
 
