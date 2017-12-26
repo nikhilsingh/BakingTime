@@ -1,6 +1,7 @@
 package com.example.android.bakingtime.adapters;
 
 import android.content.Context;
+
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,27 +14,29 @@ import com.example.android.bakingtime.R;
 import java.util.ArrayList;
 
 /**
- * Created by nikhil on 11/8/17.
+ * Adapter Class to handle details list of the recipe of a food item.
+ * This includes ingredients and all the steps required for the recipe.
  */
 
 public class RecipeDetailAdapter extends BaseAdapter {
+
     Context mContext;
     ArrayList<String> mData;
 
     public RecipeDetailAdapter(Context context) {
-        mContext =context;
-
+        mContext = context;
     }
 
     @Override
     public int getCount() {
-        if(mData==null){
+        if (mData == null) {
             return 0;
         }
         return mData.size();
     }
-    public void setDetailListData(ArrayList<String> data){
-        mData=data;
+
+    public void setDetailListData(ArrayList<String> data) {
+        mData = data;
         notifyDataSetChanged();
     }
 
@@ -49,17 +52,14 @@ public class RecipeDetailAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        Log.i("RecipeDetailAdapter","adapter view position"+position);
-        View listItemView=convertView;
-        if(listItemView==null){
-            listItemView= LayoutInflater.from(mContext).inflate(R.layout.listitem_recipe_details,parent,false);
+
+        View listItemView = convertView;
+        if (listItemView == null) {
+            listItemView = LayoutInflater.from(mContext).inflate(R.layout.listitem_recipe_details, parent, false);
         }
-
-        TextView shortDescTV = (TextView) listItemView.findViewById(R.id.tv_item_shortDesc);
-
+        TextView shortDescTV = listItemView.findViewById(R.id.tv_item_shortDesc);
         shortDescTV.setText(mData.get(position));
-
-
         return listItemView;
     }
+
 }

@@ -1,8 +1,10 @@
 <resources>
     <string name="app_name">BakingTime</string>
-    <string name="appwidget_text">EXAMPLE</string>
+    <string name="appwidget_text">Ingredients</string>
     <string name="add_widget">Add widget</string>
 
+
+    <string name="nointernet_errormsg">Please check your internet connection</string>
 
     <!-- Shared Preference related strings  -->
     <string name="pref_file_name">bakingprefs</string>
@@ -11,7 +13,7 @@
 
 
     <!-- Intent related strings -->
-    <string name="intent_foodid"></string>
+    <string name="intent_foodid">foodid</string>
     <string name="intent_bakingrecipeobj">bakingRecipeObject</string>
     <string name="intent_recipedetail_position">position</string>
 
@@ -19,8 +21,24 @@
     <!--Broadcast related   -->
     <string name="broadcast_action_dataloaded">data-load-complete</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <!--Saved Instance related keys-->
+    <string name="savedinstancekey_inglist">inglist</string>
+    <string name="savedinstancekey_bakingrecipe">bakingrecipe</string>
+    <string name="savedinstancekey_detailindex">detailindex</string>
+    <string name="savedinstancekey_foodid">foodid</string>
 
 
+    <string name="key_ingredient_list">inglist</string>
+    <string name="key_allfoodids_set">alllist</string>
+
+    <!-- Keys for video -->
+    <string name="video_resumeindexkey">resumepositionindex</string>
+    <string name="video_resumewindowindexkey">resumeWindowIndex</string>
+    <string name="video_urlkey">url</string>
+
+
+    <string name="btn_next_text">NEXT</string>
+    <string name="btn_previous_text">PREVIOUS</string>
+
+    <string name="norecipe_selected_msg">No Recipe Selected yet.</string>
 </resources>

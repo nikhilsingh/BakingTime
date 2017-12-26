@@ -2,13 +2,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_margin="16dp"
     tools:context="com.example.android.bakingtime.ui.StepDescFragment">
 
     <TextView
         android:id="@+id/step_desc_tv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-
+          android:fontFamily="sans-serif"
+        android:textSize="14sp"
+        android:textAlignment="center"
 
         android:padding="16dp"
         />

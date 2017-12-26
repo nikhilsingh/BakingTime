@@ -16,7 +16,7 @@ import android.util.Log;
 import java.util.ArrayList;
 
 /**
- * Created by nikhil on 9/8/17.
+ * Provider class to interact with Database
  */
 
 public class BakingProvider extends ContentProvider {
@@ -35,9 +35,7 @@ public class BakingProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-        Log.i(TAG, "onCreate Starts");
         mDBHelper = new BakingDbHelper(getContext());
-
         return true;
     }
 
@@ -62,7 +60,6 @@ public class BakingProvider extends ContentProvider {
 
 
         }
-
 
         cursor = db.query(tableName, projection, selection, selectionArgs, null, null, sortOrder);
         return cursor;
@@ -137,7 +134,7 @@ public class BakingProvider extends ContentProvider {
         return rowsInserted;
     }
 
-    //TODO:Remove this method  if not used
+
     @NonNull
     @Override
     public ContentProviderResult[] applyBatch(@NonNull ArrayList<ContentProviderOperation> operations) throws OperationApplicationException {
@@ -163,8 +160,6 @@ public class BakingProvider extends ContentProvider {
     @Override
     public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] selectionArgs) {
 
-
-
         return 0;
     }
 
@@ -177,7 +172,7 @@ public class BakingProvider extends ContentProvider {
         final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
 
         matcher.addURI(BakingContract.CONTENT_AUTHORITY, BakingContract.PATH_FOODITEMS, CODE_FOODITEMS);
-        matcher.addURI(BakingContract.CONTENT_AUTHORITY, BakingContract.PATH_FOODITEMS +"/#", CODE_FOODITEMS);
+        matcher.addURI(BakingContract.CONTENT_AUTHORITY, BakingContract.PATH_FOODITEMS + "/#", CODE_FOODITEMS);
         matcher.addURI(BakingContract.CONTENT_AUTHORITY, BakingContract.PATH_INGREDIENT, CODE_ING);
         matcher.addURI(BakingContract.CONTENT_AUTHORITY, BakingContract.PATH_INGREDIENT + "/#", CODE_ING_FOODID);
         matcher.addURI(BakingContract.CONTENT_AUTHORITY, BakingContract.PATH_STEPS, CODE_STEPS);

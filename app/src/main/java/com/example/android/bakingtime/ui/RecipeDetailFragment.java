@@ -1,7 +1,9 @@
 package com.example.android.bakingtime.ui;
 
 import android.content.Context;
-import android.database.Cursor;
+
+import android.content.SharedPreferences;
+
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -12,68 +14,97 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.Button;
+
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.android.bakingtime.R;
 import com.example.android.bakingtime.adapters.RecipeDetailAdapter;
-import com.example.android.bakingtime.data.BakingContract;
-import com.example.android.bakingtime.model.BakeFoodItem;
+
 import com.example.android.bakingtime.model.BakingRecipe;
 import com.example.android.bakingtime.model.RecipeStep;
 import com.example.android.bakingtime.sync.BakingRecipeDBLoader;
+import com.example.android.bakingtime.utils.RecipeDataUtil;
+
 
 import java.util.ArrayList;
 
-import static com.example.android.bakingtime.utils.RecipeDataUtil.getBakingRecipeFromDB;
+import java.util.HashSet;
+import java.util.Set;
+
+import butterknife.BindString;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+
 
 /**
- * Created by nikhil on 11/8/17.
+ * Fragment class which handles the details of a recipe.
  */
 
 public class RecipeDetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<BakingRecipe> {
 
     public static final String TAG = "RecipeDetailFragment";
+    @BindView(R.id.lv_recipedetail)
     ListView recipeDetailLV;
+
     ArrayList<String> mDataList;
+
     BakingRecipe mCurrentBakingRecipe;
+
+    @BindView(R.id.tv_recipedetail_name)
     TextView recipeNameTV;
     OnDetailActionListener mCallback;
     RecipeDetailAdapter mRecipeAdapter;
-    Button mPreviousBtn, mNextButton;
+    @BindView(R.id.btn_previousitem)
+    ImageButton mPreviousBtn;
+    @BindView(R.id.btn_nextitem)
+    ImageButton mNextButton;
 
+    @BindString(R.string.savedinstancekey_bakingrecipe)
+    String mCurrentRecipeKey;
 
-    ArrayList<BakeFoodItem> mAllFoodItemList;
+    @BindString(R.string.pref_file_name)
+    String mPrefKey_FileName;
+    @BindString(R.string.key_allfoodids_set)
+    String mAllFoodIdSetKey;
+
+    ArrayList<Integer> mAllFoodIdList;
     int mCurrentFoodId;
-    int mDetailIndex=0;
+    int mDetailIndex = 0;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
-        Log.i(TAG, "On Create starts");
         mCurrentFoodId = mCallback.getCurrentFoodId();
-        mAllFoodItemList = mCallback.getAllFoodItemList();
-
+        mPrefKey_FileName=getString(R.string.pref_file_name);
+        SharedPreferences mSharedPref = getActivity().getSharedPreferences(mPrefKey_FileName, Context.MODE_PRIVATE);
+        mAllFoodIdSetKey=getString(R.string.key_allfoodids_set);
+        Set<String> strSet = mSharedPref.getStringSet(mAllFoodIdSetKey, new HashSet<String>());
+        mAllFoodIdList = RecipeDataUtil.getAllFoodIdList(strSet);
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        Log.i(TAG, "onCreateView starts");
         View rootView = inflater.inflate(R.layout.fragment_recipe_details, container, false);
+        ButterKnife.bind(this, rootView);
 
-        recipeDetailLV = (ListView) rootView.findViewById(R.id.lv_recipedetail);
-        recipeNameTV = (TextView) rootView.findViewById(R.id.tv_recipedetail_name);
-        mPreviousBtn = (Button) rootView.findViewById(R.id.btn_previousitem);
-        mNextButton = (Button) rootView.findViewById(R.id.btn_nextitem);
         mRecipeAdapter = new RecipeDetailAdapter(getContext());
         recipeDetailLV.setAdapter(mRecipeAdapter);
-        getCurrentRecipeFromDB(mCurrentFoodId);
+        if (savedInstanceState == null) {
+            getCurrentRecipeFromDB(mCurrentFoodId);
+        } else {
+            mCurrentBakingRecipe = savedInstanceState.getParcelable(mCurrentRecipeKey);
+            setBakingRecipeData(mCurrentBakingRecipe);
+        }
+
         recipeDetailLV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+               view.setSelected(true);
                 mCallback.onDetailClicked(position);
             }
         });
@@ -85,7 +116,6 @@ public class RecipeDetailFragment extends Fragment implements LoaderManager.Load
 
             }
         });
-
         mPreviousBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -93,135 +123,101 @@ public class RecipeDetailFragment extends Fragment implements LoaderManager.Load
             }
         });
 
-        if (savedInstanceState != null) {
-            mCurrentBakingRecipe = savedInstanceState.getParcelable("bakingrecipe");
-            setBakingRecipeData(mCurrentBakingRecipe);
-        }
-
         return rootView;
     }
 
-    void onDetailItemClick(int position){
 
-        if(position==0){
-
-            //show Ingredients List in Step View
-        }else{
-            //show Video/Desc Fragments
-        }
-
-    }
     @Override
     public void onAttach(Context context) {
-        Log.i(TAG, "onAttach starts");
         super.onAttach(context);
         mCallback = (OnDetailActionListener) context;
-
     }
 
-
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        Log.i(TAG, "On Activity Created"+mCurrentFoodId);
-
-    }
-
-    public interface OnDetailActionListener {
-        void onDetailClicked(int position);
-        ArrayList<BakeFoodItem> getAllFoodItemList();
-        int getCurrentFoodId();
-
-        void updateNewCurrentRecipe(int foodid,BakingRecipe newCurrentBakingRecipe);
-    }
 
     void getCurrentRecipeFromDB(int foodId) {
-        Log.i(TAG,"Start fetching recipe from DB.Current Food Id "+foodId);
-        if (foodId> 0 ) {
-            mCurrentFoodId=foodId;
-            //Show ProgressBar
-            //hide list
-            getLoaderManager().restartLoader(22, null,this);
+        Log.i(TAG, "Start fetching recipe from DB.Current Food Id " + foodId);
+        if (foodId > 0) {
+            mCurrentFoodId = foodId;
+            //Todo: Show ProgressBar
+            //Todo: hide list
+            getLoaderManager().restartLoader(22, null, this);
         }
     }
+
     public void updateToPreviousFoodId() {
 
-        int currentIndex = -1;
-        int i;
-        for (i = 0; i < mAllFoodItemList.size(); i++) {
-            if (mCurrentFoodId == mAllFoodItemList.get(i).getFoodItemId()) {
-                currentIndex = i;
-                break;
-            }
-        }
-        if (currentIndex == 1) {
+        int currentFoodItemIndex = getFoodItemIndex();
+
+        if (currentFoodItemIndex == 1) {
             hidePreviousItemButton();
         } else {
             showPreviousItemButton();
         }
-        int previousFoodId = mAllFoodItemList.get(currentIndex - 1).getFoodItemId();
+        int previousFoodId = mAllFoodIdList.get(currentFoodItemIndex - 1);
         getCurrentRecipeFromDB(previousFoodId);
     }
 
-    public void updateToNextFoodId() {
-
-        int mAllFoodListSize = mAllFoodItemList.size();
-        int lastIndex = mAllFoodListSize - 1;
-
+    int getFoodItemIndex() {
         int currentIndex = -1;
         int i;
-        for (i = 0; i < mAllFoodItemList.size(); i++) {
-            if (mCurrentFoodId == mAllFoodItemList.get(i).getFoodItemId()) {
+        for (i = 0; i < mAllFoodIdList.size(); i++) {
+            if (mCurrentFoodId == mAllFoodIdList.get(i)) {
                 currentIndex = i;
                 break;
             }
         }
+        return currentIndex;
+    }
+
+    public void updateToNextFoodId() {
+
+        int mAllFoodListSize = mAllFoodIdList.size();
+        int lastIndex = mAllFoodListSize - 1;
+
+        int currentFoodItemIndex = getFoodItemIndex();
 
 
-        if (currentIndex + 1 == lastIndex) {
+        if (currentFoodItemIndex + 1 == lastIndex) {
             hideNextItemButton();
         } else {
             showNextItemButton();
         }
 
-        int nextFoodId = mAllFoodItemList.get(currentIndex + 1).getFoodItemId();
-
+        int nextFoodId = mAllFoodIdList.get(currentFoodItemIndex + 1);
         getCurrentRecipeFromDB(nextFoodId);
-
 
     }
 
     public void setBakingRecipeData(BakingRecipe bakingRecipe) {
-        Log.i(TAG, "setBakingRecipeData starts");
         mCurrentBakingRecipe = bakingRecipe;
         recipeNameTV.setText(mCurrentBakingRecipe.getBakeFoodItem().getFoodItemName());
         mRecipeAdapter.setDetailListData(prepareDetailList());
+        int foodItemIndex = getFoodItemIndex();
+        if (foodItemIndex == 0) {
+            hidePreviousItemButton();
+        }
+        if (foodItemIndex == mAllFoodIdList.size() - 1) {
+            hideNextItemButton();
+        }
 
     }
 
 
     ArrayList<String> prepareDetailList() {
-        Log.i(TAG, "prepareDetailList starts");
         mDataList = null;
         mDataList = new ArrayList<>();
         mDataList.add("Ingredients");
-
         mCurrentBakingRecipe.getRecipeStepList().toString();
         for (RecipeStep step : mCurrentBakingRecipe.getRecipeStepList()) {
             mDataList.add(step.getStepShortDesc());
         }
-        Log.i(TAG, "mDataList  is " + mDataList.toString());
         return mDataList;
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
 
-        Log.i(TAG, "OnSaveInstance State starts");
-        outState.putParcelable("bakingrecipe", mCurrentBakingRecipe);
-        //outState.putInt("foodid", mFoodId);
-
+        outState.putParcelable(mCurrentRecipeKey, mCurrentBakingRecipe);
         super.onSaveInstanceState(outState);
     }
 
@@ -254,24 +250,33 @@ public class RecipeDetailFragment extends Fragment implements LoaderManager.Load
     @Override
     public void onLoadFinished(Loader<BakingRecipe> loader, BakingRecipe data) {
         Log.i(TAG, "onLoadFinished starts");
+
         if (data != null) {
             mCurrentBakingRecipe = null;
         }
 
-     //   mProgressBar.setVisibility(View.GONE);
+        //   TOdo:mProgressBar.setVisibility(View.GONE);
         mCurrentBakingRecipe = data;
         mDetailIndex = 0;
         newCurrentRecipeDataAvailable();
 
     }
 
-    void newCurrentRecipeDataAvailable(){
+    void newCurrentRecipeDataAvailable() {
         setBakingRecipeData(mCurrentBakingRecipe);
-        mCallback.updateNewCurrentRecipe(mCurrentFoodId,mCurrentBakingRecipe);
+        mCallback.updateNewCurrentRecipe(mCurrentFoodId, mCurrentBakingRecipe);
     }
 
     @Override
     public void onLoaderReset(Loader<BakingRecipe> loader) {
 
+    }
+
+    public interface OnDetailActionListener {
+        void onDetailClicked(int position);
+
+        int getCurrentFoodId();
+
+        void updateNewCurrentRecipe(int foodid, BakingRecipe newCurrentBakingRecipe);
     }
 }

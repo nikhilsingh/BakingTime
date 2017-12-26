@@ -4,7 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Created by nikhil on 9/8/17.
+ * Model class to describe all the ingredients required for a particular recipe.
  */
 
 public class RecipeIngredient implements Parcelable {
@@ -81,7 +81,7 @@ public class RecipeIngredient implements Parcelable {
 
     @Override
     public String toString() {
-        return new String ("\nFoodId: "+foodItemId+" ingredient desc "+ingredientDesc);
+        return "\nFoodId: "+foodItemId+" ingredient desc "+ingredientDesc;
     }
 
     @Override

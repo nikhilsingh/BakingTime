@@ -3,6 +3,7 @@ package com.example.android.bakingtime.ui;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,50 +15,72 @@ import com.example.android.bakingtime.model.RecipeIngredient;
 
 import java.util.ArrayList;
 
+import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
- * A simple {@link Fragment} subclass.
+ * Fragment to handle the display of all the ingredients.
  */
 public class IngListFragment extends Fragment {
     @BindView(R.id.ingredientList)
     ListView mIngredientListView;
+
+    @BindString(R.string.key_ingredient_list)
+    String mKey_IngList;
+
     IngredientListAdapter mIngAdapter;
     ArrayList<RecipeIngredient> mRecipeIngList;
+
+    public static String TAG = "IngListFragment";
 
     public IngListFragment() {
         // Required empty public constructor
     }
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         // Inflate the layout for this fragment
-        View rootView= inflater.inflate(R.layout.fragment_ing_list, container, false);
-        ButterKnife.bind(this,rootView);
-        mRecipeIngList = new ArrayList<>();
-         mIngAdapter = new IngredientListAdapter(getContext(), mRecipeIngList);
+        View rootView = inflater.inflate(R.layout.fragment_ing_list, container, false);
+        ButterKnife.bind(this, rootView);
+
+        mIngAdapter = new IngredientListAdapter(getContext(), new ArrayList<RecipeIngredient>());
         mIngredientListView.setAdapter(mIngAdapter);
+
+        if (savedInstanceState != null) {
+            mRecipeIngList = savedInstanceState.getParcelableArrayList(mKey_IngList);
+        }
         return rootView;
 
     }
 
-    public void setIngArrayList(ArrayList<RecipeIngredient> list){
-        mRecipeIngList= list;
+    public void setIngArrayList(ArrayList<RecipeIngredient> list) {
+        mRecipeIngList = list;
+        updateListView();
     }
 
-
-    void updateListView(){
-        mIngAdapter.updateListData(mRecipeIngList);
+    void updateListView() {
+        if (mIngAdapter != null) {
+            Log.i(TAG, "Calling adapter to update Ingredient List data");
+            mIngAdapter.updateListData(mRecipeIngList);
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if(mRecipeIngList!=null){
+        if (mRecipeIngList != null) {
             updateListView();
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        if (mRecipeIngList != null && mRecipeIngList.size() > 0) {
+            outState.putParcelableArrayList(mKey_IngList, mRecipeIngList);
+        }
+        super.onSaveInstanceState(outState);
     }
 }

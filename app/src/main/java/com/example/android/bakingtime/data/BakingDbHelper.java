@@ -7,19 +7,20 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 /**
- * Created by nikhil on 9/8/17.
+ * Helper class to create required tables
  */
 
 public class BakingDbHelper extends SQLiteOpenHelper {
 
     private static final String TAG = "BakingDbHelper";
     private static final String DATABASE_NAME = "baking.db";
-    private static final int VERSION = 2;
+    private static final int VERSION = 3;
 
     private static final String CREATE_TABLE_FOOD = "CREATE TABLE " + BakingContract.FoodItem.TABLE_NAME + " ( " +
             BakingContract.FoodItem._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
             BakingContract.FoodItem.COLUMN_FOOD_ID + " INTEGER," +
             BakingContract.FoodItem.COLUMN_FOOD_NAME + " TEXT," +
+            BakingContract.FoodItem.COLUMN_FOODIMAGE + " TEXT," +
             BakingContract.FoodItem.COLUMN_SERVINGS + " INTEGER);";
 
     private static final String CREATE_TABLE_INGREDIENT = "CREATE TABLE " + BakingContract.Ingredient.TABLE_NAME + " ( " +
@@ -46,11 +47,10 @@ public class BakingDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        Log.i(TAG,"onCreate starts");
+        Log.i(TAG,"Creating DB Tables");
         db.execSQL(CREATE_TABLE_FOOD);
         db.execSQL(CREATE_TABLE_INGREDIENT);
         db.execSQL(CREATE_TABLE_STEPS);
-        Log.i(TAG,"onCreate ends");
 
     }
 

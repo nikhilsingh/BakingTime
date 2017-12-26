@@ -3,7 +3,8 @@ package com.example.android.bakingtime.utils;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.util.JsonReader;
+import android.text.TextUtils;
+
 import android.util.Log;
 
 import com.example.android.bakingtime.data.BakingContract;
@@ -16,86 +17,32 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.lang.reflect.Array;
+
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Set;
 
 /**
- * Created by nikhil on 10/8/17.
+ * Util class to handle processing of different data related to Baking Recipe
  */
 
 public class RecipeDataUtil {
-    public static final String TAG="RecipeDataUtil";
+    public static final String TAG = "RecipeDataUtil";
 
-    public static ArrayList<BakingRecipe> getBakingRecipeObjFromJSON(String jsonString) throws JSONException, IOException {
-
-        ArrayList<BakingRecipe> bakingRecipeArrayList = new ArrayList<>();
-
-
-        JSONArray recipeData = new JSONArray(jsonString);
-
-        for (int i = 0; i < recipeData.length(); i++) {
-            BakingRecipe bakingRecipe = new BakingRecipe();
-            BakeFoodItem bakeFoodItem = new BakeFoodItem();
-
-
-            JSONObject recipeObj = recipeData.getJSONObject(i);
-            int foodItemId = recipeObj.getInt("id");
-            bakeFoodItem.setFoodItemId(foodItemId);
-            bakeFoodItem.setFoodItemName(recipeObj.getString("name"));
-            bakeFoodItem.setFoodItemServing(recipeObj.getInt("servings"));
-
-
-            ArrayList<RecipeIngredient> ingArrayList = new ArrayList<RecipeIngredient>();
-            JSONArray ingArray = recipeObj.getJSONArray("ingredients");
-            for (int j = 0; j < ingArray.length(); j++) {
-
-                JSONObject ingObject = ingArray.getJSONObject(j);
-                RecipeIngredient recipeIngredient = new RecipeIngredient();
-
-                recipeIngredient.setFoodItemId(foodItemId);
-                recipeIngredient.setIngredientDesc(ingObject.getString("ingredient"));
-                recipeIngredient.setIngredientId(j);
-                recipeIngredient.setIngredientMeasure(ingObject.getString("measure"));
-                recipeIngredient.setIngredientQuantity(ingObject.getDouble("quantity"));
-
-                ingArrayList.add(recipeIngredient);
-            }
-
-
-            ArrayList<RecipeStep> stepArrayList = new ArrayList<RecipeStep>();
-            JSONArray stepArray = recipeObj.getJSONArray("steps");
-            for (int k = 0; k < stepArray.length(); k++) {
-                RecipeStep recipeStep = new RecipeStep();
-                JSONObject stepObj = stepArray.getJSONObject(k);
-
-                recipeStep.setFoodItemId(foodItemId);
-                recipeStep.setStepId(stepObj.getInt("id"));
-                recipeStep.setStepShortDesc(stepObj.getString("shortDescription"));
-                recipeStep.setStepLongDesc(stepObj.getString("description"));
-                recipeStep.setStepThumbnailUrl(stepObj.getString("thumbnailURL"));
-                recipeStep.setStepVideoUrl(stepObj.getString("videoURL"));
-
-                stepArrayList.add(recipeStep);
-            }
-
-            bakingRecipe.setBakeFoodItem(bakeFoodItem);
-            bakingRecipe.setRecipeIngList(ingArrayList);
-            bakingRecipe.setRecipeStepList(stepArrayList);
-
-            bakingRecipeArrayList.add(bakingRecipe);
-
-
-        }
-        return bakingRecipeArrayList;
-
-        //   JSONObject recipeData = new JSONObject(jsonString);
-        //  Log.i("DataUtil",recipeData.toString());
-
-
-        //return bakingRecipe;
-    }
+    private static final String JSONKEY_FOODID = "id";
+    private static final String JSONKEY_FOODNAME = "name";
+    private static final String JSONKEY_SERVINGS = "servings";
+    private static final String JSONKEY_FOODIMAGE="image";
+    private static final String JSONKEY_INGREDIENTS = "ingredients";
+    private static final String JSONKEY_INGREDIENT = "ingredient";
+    private static final String JSONKEY_INGREDIENT_MEASURE = "measure";
+    private static final String JSONKEY_INGREDIENT_QUANTITY = "quantity";
+    private static final String JSONKEY_STEPS = "steps";
+    private static final String JSONKEY_STEPS_ID = "id";
+    private static final String JSONKEY_STEPS_SHORTDESC = "shortDescription";
+    private static final String JSONKEY_STEPS_DESCRIPTION = "description";
+    private static final String JSONKEY_STEPS_THUMBNAILURL = "thumbnailURL";
+    private static final String JSONKEY_STEPS_VIDEOURL = "videoURL";
 
 
     public static ArrayList<ContentValues[]> getContentValues(String jsonString) throws JSONException {
@@ -111,25 +58,26 @@ public class RecipeDataUtil {
         ContentValues[] fooditemValuesArray = new ContentValues[recipeData.length()];
 
         for (int i = 0; i < recipeData.length(); i++) {
-            BakingRecipe bakingRecipe = new BakingRecipe();
-
-
-            BakeFoodItem bakeFoodItem = new BakeFoodItem();
-
 
             JSONObject recipeObj = recipeData.getJSONObject(i);
-            int foodItemId = recipeObj.getInt("id");
+            int foodItemId = recipeObj.getInt(JSONKEY_FOODID);
 
 
             ContentValues foodItemValue = new ContentValues();
             foodItemValue.put(BakingContract.FoodItem.COLUMN_FOOD_ID, foodItemId);
-            foodItemValue.put(BakingContract.FoodItem.COLUMN_FOOD_NAME, recipeObj.getString("name"));
-            foodItemValue.put(BakingContract.FoodItem.COLUMN_SERVINGS, recipeObj.getInt("servings"));
+            foodItemValue.put(BakingContract.FoodItem.COLUMN_FOOD_NAME, recipeObj.getString(JSONKEY_FOODNAME));
+            foodItemValue.put(BakingContract.FoodItem.COLUMN_SERVINGS, recipeObj.getInt(JSONKEY_SERVINGS));
+
+            String foodImg=recipeObj.getString(JSONKEY_FOODIMAGE);
+            if(TextUtils.isEmpty(foodImg) && foodItemId !=2){
+                foodImg="http://img.taste.com.au/9isesBer/taste/2016/11/caramello-cake-105070-1.jpeg";
+            }
+            foodItemValue.put(BakingContract.FoodItem.COLUMN_FOODIMAGE,foodImg);
 
             fooditemValuesArray[i] = foodItemValue;
 
 
-            JSONArray ingArray = recipeObj.getJSONArray("ingredients");
+            JSONArray ingArray = recipeObj.getJSONArray(JSONKEY_INGREDIENTS);
             for (int j = 0; j < ingArray.length(); j++) {
                 ContentValues ingredientValue = new ContentValues();
 
@@ -139,28 +87,37 @@ public class RecipeDataUtil {
 
                 ingredientValue.put(BakingContract.Ingredient.COLUMN_FOOD_ID, foodItemId);
                 ingredientValue.put(BakingContract.Ingredient.COLUMN_ING_ID, j);
-                ingredientValue.put(BakingContract.Ingredient.COLUMN_DESC, ingObject.getString("ingredient"));
-                ingredientValue.put(BakingContract.Ingredient.COLUMN_MEASURE, ingObject.getString("measure"));
-                ingredientValue.put(BakingContract.Ingredient.COLUMN_QUANTITY, ingObject.getDouble("quantity"));
+                ingredientValue.put(BakingContract.Ingredient.COLUMN_DESC, ingObject.getString(JSONKEY_INGREDIENT));
+                ingredientValue.put(BakingContract.Ingredient.COLUMN_MEASURE, ingObject.getString(JSONKEY_INGREDIENT_MEASURE));
+                ingredientValue.put(BakingContract.Ingredient.COLUMN_QUANTITY, ingObject.getDouble(JSONKEY_INGREDIENT_QUANTITY));
 
                 ingValueList.add(ingredientValue);
 
             }
 
-
-            JSONArray stepArray = recipeObj.getJSONArray("steps");
+            int count=0;
+            JSONArray stepArray = recipeObj.getJSONArray(JSONKEY_STEPS);
             for (int k = 0; k < stepArray.length(); k++) {
 
                 ContentValues stepValue = new ContentValues();
 
                 JSONObject stepObj = stepArray.getJSONObject(k);
                 stepValue.put(BakingContract.Step.COLUMN_FOOD_ID, foodItemId);
-                stepValue.put(BakingContract.Step.COLUMN_STEP_ID, stepObj.getInt("id"));
-                stepValue.put(BakingContract.Step.COLUMN_SHORTDESC, stepObj.getString("shortDescription"));
-                stepValue.put(BakingContract.Step.COLUMN_LONGDESC, stepObj.getString("description"));
-                stepValue.put(BakingContract.Step.COLUMN_THUMBNAILURL, stepObj.getString("thumbnailURL"));
-                stepValue.put(BakingContract.Step.COLUMN_VIDEOURL, stepObj.getString("videoURL"));
+                stepValue.put(BakingContract.Step.COLUMN_STEP_ID, stepObj.getInt(JSONKEY_STEPS_ID));
+                stepValue.put(BakingContract.Step.COLUMN_SHORTDESC, stepObj.getString(JSONKEY_STEPS_SHORTDESC));
+                stepValue.put(BakingContract.Step.COLUMN_LONGDESC, stepObj.getString(JSONKEY_STEPS_DESCRIPTION));
 
+                String thumbUrl = stepObj.getString(JSONKEY_STEPS_THUMBNAILURL);
+                String videoUrl = stepObj.getString(JSONKEY_STEPS_VIDEOURL);
+
+                if (!TextUtils.isEmpty(thumbUrl) && thumbUrl.endsWith(".mp4") && TextUtils.isEmpty(videoUrl)) {
+                    videoUrl = thumbUrl;
+                }
+
+
+
+                stepValue.put(BakingContract.Step.COLUMN_THUMBNAILURL, thumbUrl);
+                stepValue.put(BakingContract.Step.COLUMN_VIDEOURL, videoUrl);
 
                 stepValueList.add(stepValue);
 
@@ -184,14 +141,12 @@ public class RecipeDataUtil {
 
 
     public static BakingRecipe getBakingRecipeFromDB(int foodId, Context context) {
-        Log.i(TAG,"getBakingRecipeFromDB starts. Food Id "+foodId);
-
+        Log.i(TAG, "getBakingRecipeFromDB starts. Food Id " + foodId);
         BakingRecipe bakingRecipe = new BakingRecipe();
+        bakingRecipe.setBakeFoodItem(getBakeFoodItemFromDB(foodId, context));
+        bakingRecipe.setRecipeStepList(getRecipeStepListFromDB(foodId, context));
+        bakingRecipe.setRecipeIngList(getRecipeIngredientFromDB(foodId, context));
 
-        bakingRecipe.setBakeFoodItem(getBakeFoodItemFromDB(foodId,context));
-        bakingRecipe.setRecipeStepList(getRecipeStepListFromDB(foodId,context));
-        bakingRecipe.setRecipeIngList(getRecipeIngredientFromDB(foodId,context));
-        Log.i(TAG,"baking recipe is "+bakingRecipe.toString());
         return bakingRecipe;
     }
 
@@ -206,11 +161,10 @@ public class RecipeDataUtil {
         if (foodItemCursor != null && foodItemCursor.getCount() > 0) {
             foodItemCursor.moveToFirst();
             bakeFoodItem.setFoodItemId(foodId);
-            int serving = foodItemCursor.getInt(foodItemCursor.getColumnIndex(BakingContract.FoodItem.COLUMN_SERVINGS));
-            Log.i("DataUtil","servings"+serving);
 
             bakeFoodItem.setFoodItemServing(foodItemCursor.getInt(foodItemCursor.getColumnIndex(BakingContract.FoodItem.COLUMN_SERVINGS)));
             bakeFoodItem.setFoodItemName(foodItemCursor.getString(foodItemCursor.getColumnIndex(BakingContract.FoodItem.COLUMN_FOOD_NAME)));
+            bakeFoodItem.setFoodImg(foodItemCursor.getString(foodItemCursor.getColumnIndex(BakingContract.FoodItem.COLUMN_FOODIMAGE)));
         }
 
 
@@ -253,66 +207,134 @@ public class RecipeDataUtil {
         String[] mSelectionArgs = new String[]{sFoodId};
         final Cursor stepCursor = context.getContentResolver().query(BakingContract.Step.CONTENT_URI, null, mSelection, mSelectionArgs, null);
 
-        if(stepCursor!=null && stepCursor.getCount()>0){
+        if (stepCursor != null && stepCursor.getCount() > 0) {
             stepCursor.moveToFirst();
-            do{
+            do {
                 RecipeStep recipeStep = new RecipeStep();
 
                 recipeStep.setStepVideoUrl(stepCursor.getString(stepCursor.getColumnIndex(BakingContract.Step.COLUMN_VIDEOURL)));
                 recipeStep.setStepId(stepCursor.getInt(stepCursor.getColumnIndex(BakingContract.Step.COLUMN_STEP_ID)));
                 recipeStep.setFoodItemId(stepCursor.getInt(stepCursor.getColumnIndex(BakingContract.Step.COLUMN_FOOD_ID)));
-                //recipeStep.setStepThumbnailUrl();
+                recipeStep.setStepThumbnailUrl(stepCursor.getString(stepCursor.getColumnIndex(BakingContract.Step.COLUMN_THUMBNAILURL)));
                 recipeStep.setStepShortDesc(stepCursor.getString(stepCursor.getColumnIndex(BakingContract.Step.COLUMN_SHORTDESC)));
                 recipeStep.setStepLongDesc(stepCursor.getString(stepCursor.getColumnIndex(BakingContract.Step.COLUMN_LONGDESC)));
-
 
 
                 recipeStepList.add(recipeStep);
 
 
-
-
-            }while (stepCursor.moveToNext());
+            } while (stepCursor.moveToNext());
         }
 
         stepCursor.close();
         return recipeStepList;
     }
 
-    public static ArrayList<BakeFoodItem> getAllFoodItemList(Cursor data){
+    public static ArrayList<BakeFoodItem> getAllFoodItemList(Cursor data) {
         ArrayList<BakeFoodItem> bakeFoodItemArrayList = new ArrayList<>();
 
-        if(data!=null && data.getCount() > 0){
+        if (data != null && data.getCount() > 0) {
             data.moveToFirst();
-            do{
+            do {
                 BakeFoodItem bakeFoodItem = new BakeFoodItem();
 
                 bakeFoodItem.setFoodItemId(data.getInt(data.getColumnIndex(BakingContract.FoodItem.COLUMN_FOOD_ID)));
                 bakeFoodItem.setFoodItemName(data.getString(data.getColumnIndex(BakingContract.FoodItem.COLUMN_FOOD_NAME)));
-
+                bakeFoodItem.setFoodImg(data.getString(data.getColumnIndex(BakingContract.FoodItem.COLUMN_FOODIMAGE)));
 
                 bakeFoodItemArrayList.add(bakeFoodItem);
 
 
-            }while (data.moveToNext());
+            } while (data.moveToNext());
         }
-
 
 
         return bakeFoodItemArrayList;
 
     }
 
-    public static ArrayList<RecipeIngredient> getIngListForDetailIndex(BakingRecipe bakingRecipe){
+    public static ArrayList<RecipeIngredient> getIngListForDetailIndex(BakingRecipe bakingRecipe) {
 
         return bakingRecipe.getRecipeIngList();
     }
 
-    public static RecipeStep getStepForDetailIndex(int detailIndex,BakingRecipe bakingRecipe){
-        return bakingRecipe.getRecipeStepList().get(detailIndex-1);
+    public static RecipeStep getStepForDetailIndex(int detailIndex, BakingRecipe bakingRecipe) {
+        return bakingRecipe.getRecipeStepList().get(detailIndex - 1);
     }
 
 
+    public static ArrayList<Integer> getAllFoodIdList(Set<String> stringSet) {
+        ArrayList<Integer> mAllFoodIdList = new ArrayList<>();
+
+        for (String s : stringSet) {
+            mAllFoodIdList.add(Integer.valueOf(s));
+        }
+        Collections.sort(mAllFoodIdList);
+        return mAllFoodIdList;
+    }
+/*
+    public static ArrayList<BakingRecipe> getBakingRecipeObjFromJSON(String jsonString) throws JSONException, IOException {
+
+        ArrayList<BakingRecipe> bakingRecipeArrayList = new ArrayList<>();
 
 
+        JSONArray recipeData = new JSONArray(jsonString);
+
+        for (int i = 0; i < recipeData.length(); i++) {
+            BakingRecipe bakingRecipe = new BakingRecipe();
+            BakeFoodItem bakeFoodItem = new BakeFoodItem();
+
+
+            JSONObject recipeObj = recipeData.getJSONObject(i);
+            int foodItemId = recipeObj.getInt(JSONKEY_FOODID);
+            bakeFoodItem.setFoodItemId(foodItemId);
+            bakeFoodItem.setFoodItemName(recipeObj.getString(JSONKEY_FOODNAME));
+            bakeFoodItem.setFoodItemServing(recipeObj.getInt(JSONKEY_SERVINGS));
+
+
+            ArrayList<RecipeIngredient> ingArrayList = new ArrayList<RecipeIngredient>();
+            JSONArray ingArray = recipeObj.getJSONArray(JSONKEY_INGREDIENTS);
+            for (int j = 0; j < ingArray.length(); j++) {
+
+                JSONObject ingObject = ingArray.getJSONObject(j);
+                RecipeIngredient recipeIngredient = new RecipeIngredient();
+
+                recipeIngredient.setFoodItemId(foodItemId);
+                recipeIngredient.setIngredientDesc(ingObject.getString(JSONKEY_INGREDIENT));
+                recipeIngredient.setIngredientId(j);
+                recipeIngredient.setIngredientMeasure(ingObject.getString(JSONKEY_INGREDIENT_MEASURE));
+                recipeIngredient.setIngredientQuantity(ingObject.getDouble(JSONKEY_INGREDIENT_QUANTITY));
+
+                ingArrayList.add(recipeIngredient);
+            }
+
+
+            ArrayList<RecipeStep> stepArrayList = new ArrayList<RecipeStep>();
+            JSONArray stepArray = recipeObj.getJSONArray(JSONKEY_STEPS);
+            for (int k = 0; k < stepArray.length(); k++) {
+                RecipeStep recipeStep = new RecipeStep();
+                JSONObject stepObj = stepArray.getJSONObject(k);
+
+                recipeStep.setFoodItemId(foodItemId);
+                recipeStep.setStepId(stepObj.getInt(JSONKEY_STEPS_ID));
+                recipeStep.setStepShortDesc(stepObj.getString(JSONKEY_STEPS_SHORTDESC));
+                recipeStep.setStepLongDesc(stepObj.getString(JSONKEY_STEPS_DESCRIPTION));
+                recipeStep.setStepThumbnailUrl(stepObj.getString(JSONKEY_STEPS_THUMBNAILURL));
+                recipeStep.setStepVideoUrl(stepObj.getString(JSONKEY_STEPS_VIDEOURL));
+
+                stepArrayList.add(recipeStep);
+            }
+
+            bakingRecipe.setBakeFoodItem(bakeFoodItem);
+            bakingRecipe.setRecipeIngList(ingArrayList);
+            bakingRecipe.setRecipeStepList(stepArrayList);
+
+            bakingRecipeArrayList.add(bakingRecipe);
+
+
+        }
+        return bakingRecipeArrayList;
+
+    }
+    */
 }

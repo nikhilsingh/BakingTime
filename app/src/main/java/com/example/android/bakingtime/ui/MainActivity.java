@@ -6,15 +6,20 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
-import android.widget.GridView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
+
 import com.example.android.bakingtime.R;
 import com.example.android.bakingtime.adapters.SelectRecipeAdapter;
 import com.example.android.bakingtime.model.BakeFoodItem;
@@ -24,6 +29,8 @@ import com.example.android.bakingtime.utils.RecipeDataUtil;
 import com.facebook.stetho.Stetho;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 import butterknife.BindString;
 import butterknife.BindView;
@@ -35,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     public static final int LOADER_RECIPE_DB = 20;
     @BindView(R.id.gv_main_selectrecipe)
-    GridView mGV_SelectRecipe;
+    RecyclerView mRV_SelectRecipe;
     @BindView(R.id.pb_main_inprogress)
     ProgressBar mProgressBar;
     @BindString(R.string.broadcast_action_dataloaded)
@@ -48,6 +55,11 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     String mIntentKey_FoodId;
     @BindString(R.string.pref_key_foodid)
     String mPrefKey_FoodId;
+    @BindString(R.string.key_allfoodids_set)
+    String mAllFoodIdSetKey;
+    @BindView(R.id.tv_main_error)
+    TextView mErrorView;
+
     ArrayList<BakeFoodItem> mAllFoodItemList;
 
     SharedPreferences mSharedPref;
@@ -59,48 +71,57 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.i(TAG,"onCreate starts");
         setContentView(R.layout.activity_main);
         Stetho.initializeWithDefaults(this);
         ButterKnife.bind(this);
         mAllFoodItemList = new ArrayList<>();
         mReceiver = new RecipeLoadBroadcastReceiver();
         LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, new IntentFilter(mBroadcastActionDataLoad));
-
         mSharedPref = getSharedPreferences(mPrefFileName, Context.MODE_PRIVATE);
+        mErrorView.setVisibility(View.GONE);
+
+        mRV_SelectRecipe.setLayoutManager(new GridLayoutManager(this, getResources().getInteger(R.integer.selectrecipe_grid_colmn)));
+
 
         if (!mSharedPref.getBoolean(isDataLoadedKey, false)) {
-            Log.i("onCreate", "calling to start service");
-            mProgressBar.setVisibility(View.VISIBLE);
-            Intent service = new Intent(this, RecipeDataRemoteService.class);
-            startService(service);
+            Log.i(TAG, "Calling Service to save remote data .");
+            if (isInternetActive()) {
+                mProgressBar.setVisibility(View.VISIBLE);
+                Intent service = new Intent(this, RecipeDataRemoteService.class);
+                startService(service);
+            } else {
+                showErrorMessage();
+            }
         } else {
-
-
+            Log.i(TAG, "Load data from Database");
             getSupportLoaderManager().initLoader(LOADER_RECIPE_DB, null, this);
         }
-        Log.i(TAG,"OnCreate Ends");
-
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        Log.i(TAG,"OnCreateLoader Starts");
         mProgressBar.setVisibility(View.VISIBLE);
-
         return new FoodItemCursorLoader(this);
-
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        Log.i(TAG,"onLoadFinished for Loader called. Cursor count is  "+data.getCount());
-        Log.i(TAG,"onLoadFinished Setting adapter");
-        mAllFoodItemList= RecipeDataUtil.getAllFoodItemList(data);
-        adapter = new SelectRecipeAdapter(this, this, data);
-        mGV_SelectRecipe.setAdapter(adapter);
-        mProgressBar.setVisibility(View.GONE);
+        Log.i(TAG, "Data Load from DB finished. Total Count is " + data.getCount());
 
+        mAllFoodItemList = RecipeDataUtil.getAllFoodItemList(data);
+
+        adapter = new SelectRecipeAdapter(this, this, data);
+        mRV_SelectRecipe.setAdapter(adapter);
+        mProgressBar.setVisibility(View.GONE);
+        addAllFoodItemPref();
+    }
+
+    public void addAllFoodItemPref() {
+        Set<String> foodIdStrings = new HashSet<>();
+        for (int i = 0; i < mAllFoodItemList.size(); i++) {
+            foodIdStrings.add(String.valueOf(mAllFoodItemList.get(i).getFoodItemId()));
+        }
+        mSharedPref.edit().putStringSet(mAllFoodIdSetKey, foodIdStrings).commit();
     }
 
     @Override
@@ -110,12 +131,10 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @Override
     public void onFoodSelected(int foodid) {
-        Log.i(TAG,"On Food Selected on Main activity.Food Id Selected is "+foodid);
+        Log.i(TAG, "On Food Clicked.Food Id Selected is " + foodid);
         mSharedPref.edit().putInt(mPrefKey_FoodId, foodid).commit();
-
         Intent i = new Intent(MainActivity.this, RecipeDetailActivity.class);
         i.putExtra(mIntentKey_FoodId, foodid);
-        i.putParcelableArrayListExtra("allfooditemlist",mAllFoodItemList);
         startActivity(i);
     }
 
@@ -123,7 +142,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.i(TAG,"onDestroy Called");
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiver);
     }
 
@@ -131,9 +149,35 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.i(TAG,"on Receive Broadcast RecipeLoadBroadcastReceiver");
-            getSupportLoaderManager().restartLoader(LOADER_RECIPE_DB, null, MainActivity.this);
+            Log.i(TAG, "Broadcast received from Service completion. This is the confirmation that remote data has been loaded");
+
+            if (!mSharedPref.getBoolean(isDataLoadedKey, false)) {
+                showErrorMessage();
+            } else {
+
+                getSupportLoaderManager().restartLoader(LOADER_RECIPE_DB, null, MainActivity.this);
+
+            }
         }
+    }
+
+    private boolean isInternetActive() {
+        ConnectivityManager cm =
+                (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+
+                activeNetwork.isConnected();
+        Log.i(TAG, "Internet is active?" + isConnected);
+        return isConnected;
+
+    }
+
+    private void showErrorMessage() {
+        mErrorView.setText(getString(R.string.nointernet_errormsg));
+        mErrorView.setVisibility(View.VISIBLE);
+        mProgressBar.setVisibility(View.GONE);
     }
 }
 

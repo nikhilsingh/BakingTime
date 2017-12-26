@@ -7,22 +7,24 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import com.example.android.bakingtime.data.BakingContract;
+import com.example.android.bakingtime.R;
 import com.example.android.bakingtime.model.RecipeIngredient;
 
 import java.util.ArrayList;
 
 /**
- * Created by nikhil on 12/9/17.
+ * Adapter Class to handle ListView adapter for Ingredient List
  */
 
 public class IngredientListAdapter extends BaseAdapter {
-    Context mContext;
-    ArrayList<RecipeIngredient> ingList;
-    public IngredientListAdapter(Context context, ArrayList<RecipeIngredient> data) {
-        mContext =context;
-        ingList=data;
 
+    Context mContext;
+    ArrayList<RecipeIngredient> ingList;//List of all the Ingredients for a Food Item
+    public static final String TAG = "IngredientListAdapter";
+
+    public IngredientListAdapter(Context context, ArrayList<RecipeIngredient> data) {
+        mContext = context;
+        ingList = data;
     }
 
     @Override
@@ -42,23 +44,26 @@ public class IngredientListAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        View gridItemView = convertView;
+        View listItemView = convertView;
 
-        if(gridItemView == null){
-            gridItemView = LayoutInflater.from(mContext).inflate(android.R.layout.simple_list_item_1,parent,false);
+        if (listItemView == null) {
+            listItemView = LayoutInflater.from(mContext).inflate(R.layout.listitem_ingredients, parent, false);
         }
-        TextView txtView = (TextView) gridItemView;
 
+        TextView descTV = listItemView.findViewById(R.id.item_ingdesc);
+        TextView quantityTV = listItemView.findViewById(R.id.item_ing_quantity);
 
-        txtView.setText(ingList.get(position).getIngredientDesc());
-        txtView.setBackgroundColor(0xfff0000);
+        String desc=ingList.get(position).getIngredientDesc();
+        String quantMeasure=ingList.get(position).getIngredientQuantity() + " " + ingList.get(position).getIngredientMeasure();
 
+        descTV.setText(desc);
+        quantityTV.setText(quantMeasure);
 
-        return gridItemView;
+        return listItemView;
     }
 
-    public void updateListData(ArrayList<RecipeIngredient> list){
-        ingList=list;
+    public void updateListData(ArrayList<RecipeIngredient> list) {
+        ingList = list;
         notifyDataSetChanged();
     }
 }

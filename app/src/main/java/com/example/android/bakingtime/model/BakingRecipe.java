@@ -6,7 +6,8 @@ import android.os.Parcelable;
 import java.util.ArrayList;
 
 /**
- * Created by nikhil on 10/8/17.
+ * Model class holding all the recipe details of a particular food item.
+ * When required we can get all the steps and ingredients respective to each recipe
  */
 
 public class BakingRecipe implements Parcelable {

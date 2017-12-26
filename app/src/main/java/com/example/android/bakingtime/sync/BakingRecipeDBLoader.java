@@ -1,32 +1,28 @@
 package com.example.android.bakingtime.sync;
 
 import android.content.Context;
-import android.os.AsyncTask;
+
 import android.support.v4.content.AsyncTaskLoader;
-import android.support.v4.content.Loader;
-import android.support.v4.content.res.TypedArrayUtils;
+
 import android.util.Log;
 
 import com.example.android.bakingtime.model.BakingRecipe;
 import com.example.android.bakingtime.utils.RecipeDataUtil;
 
 /**
- * Created by nikhil on 20/9/17.
+ * Loader class to get all the recipe details of a particular food item based on its foodid.
  */
 
 public class BakingRecipeDBLoader extends AsyncTaskLoader<BakingRecipe> {
-    public static final String TAG="BakingRecipeDBLoader";
+    public static final String TAG = "BakingRecipeDBLoader";
     int mFoodId;
     Context mContext;
 
-    public BakingRecipeDBLoader(Context context,int foodid) {
+    public BakingRecipeDBLoader(Context context, int foodid) {
         super(context);
-        mContext=context;
-        mFoodId=foodid;
-        Log.i(TAG,"constructor . Food Id is  "+mFoodId);
+        mContext = context;
+        mFoodId = foodid;
     }
-
-
 
     @Override
     protected void onStartLoading() {
@@ -36,14 +32,13 @@ public class BakingRecipeDBLoader extends AsyncTaskLoader<BakingRecipe> {
 
     @Override
     public BakingRecipe loadInBackground() {
-        Log.i(TAG,"loadInBackground starts. Food Id is  "+mFoodId);
-         return RecipeDataUtil.getBakingRecipeFromDB(mFoodId,mContext);
+        Log.i(TAG, "Starting to load all the recipe details for food id  " + mFoodId);
+        return RecipeDataUtil.getBakingRecipeFromDB(mFoodId, mContext);
     }
 
     @Override
     public void deliverResult(BakingRecipe data) {
         super.deliverResult(data);
     }
-
 
 }

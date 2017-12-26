@@ -4,7 +4,7 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 
 /**
- * Created by nikhil on 9/8/17.
+ * DB Contract template for all structure of different tables used.
  */
 
 public class BakingContract {
@@ -18,7 +18,6 @@ public class BakingContract {
     public static final String PATH_STEPS="steps";
     public static final String COMMON_COLUMN_FOODID="foodid";
 
-
     public static final class FoodItem implements BaseColumns {
 
         public static final Uri CONTENT_URI=buildUri(PATH_FOODITEMS);
@@ -28,6 +27,7 @@ public class BakingContract {
         public static final String COLUMN_FOOD_ID =COMMON_COLUMN_FOODID;
         public static final String COLUMN_FOOD_NAME ="foodname";
         public static final String COLUMN_SERVINGS ="servings";
+        public static final String COLUMN_FOODIMAGE="image";
 
 
     }

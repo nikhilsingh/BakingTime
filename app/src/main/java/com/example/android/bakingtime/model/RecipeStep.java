@@ -4,7 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Created by nikhil on 9/8/17.
+ * Model class describing all the steps involved in a recipe for a particular food item
  */
 
 public class RecipeStep implements Parcelable {
@@ -89,7 +89,7 @@ public class RecipeStep implements Parcelable {
 
     @Override
     public String toString() {
-        return new String("\nFood Id "+foodItemId+"Desc : "+stepShortDesc+"Step Id : "+stepId);
+        return "\nFood Id "+foodItemId+"Desc : "+stepShortDesc+"Step Id : "+stepId;
     }
 
     @Override

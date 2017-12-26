@@ -1,24 +1,26 @@
 package com.example.android.bakingtime.ui;
 
-import android.os.PersistableBundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.FrameLayout;
 
 import com.example.android.bakingtime.R;
 import com.example.android.bakingtime.model.BakingRecipe;
 import com.example.android.bakingtime.model.RecipeStep;
 import com.example.android.bakingtime.utils.RecipeDataUtil;
 
+import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static com.example.android.bakingtime.utils.RecipeDataUtil.getBakingRecipeFromDB;
-
+/**
+*Class to handle Steps (Ingredients,Video, Step description ) for single pane devices
+*
+ */
 public class RecipeStepActivity extends AppCompatActivity {
     @Nullable
     @BindView(R.id.nextbutton)
@@ -27,7 +29,29 @@ public class RecipeStepActivity extends AppCompatActivity {
     @BindView(R.id.previousbutton)
     Button mPreviousButton;
 
+    @Nullable
+    @BindView(R.id.tab_stepIngContainer)
+    FrameLayout mIngContainer;
+    @Nullable
+    @BindView(R.id.stepVideoContainer)
+    FrameLayout mVideoContainer;
+
+    @Nullable
+    @BindView(R.id.stepDescContainer)
+    FrameLayout mDescContainer;
+
+
+    @BindString(R.string.intent_bakingrecipeobj)
+    String mIntentCurrentRecipeKey;
+    @BindString(R.string.intent_recipedetail_position)
+    String mIntentDetailPositionKey;
     int mCurrentIndex;
+
+    @BindString(R.string.savedinstancekey_bakingrecipe)
+    String mParcelableCurrentRecipeKey;
+
+    @BindString(R.string.savedinstancekey_detailindex)
+    String mParcelableDetailIndex;
     BakingRecipe mCurrentBakingRecipe;
 
     RecipeStep mCurrentStep;
@@ -45,47 +69,27 @@ public class RecipeStepActivity extends AppCompatActivity {
         }
 
         if (savedInstanceState == null) {
+            Log.i(TAG, "On Create saved instance is null");
+
+            mCurrentBakingRecipe = getIntent().getExtras().getParcelable(mIntentCurrentRecipeKey);
+            mCurrentIndex = getIntent().getIntExtra(mIntentDetailPositionKey, -1);
 
 
-            mCurrentBakingRecipe = getIntent().getExtras().getParcelable("bakingRecipeObject");
-            mCurrentIndex = getIntent().getIntExtra("position", -1);
-            if (mCurrentIndex > 0) {
-                //    mCurrentStep = RecipeDataUtil.getStepForDetailIndex(mCurrentIndex, mCurrentBakingRecipe);
-            }
-            Log.i("StepActivity", "Baking Recipe " + mCurrentBakingRecipe.getBakeFoodItem().getFoodItemName());
-
-            //     Log.i("StepActivity","ing list entre"+mBakingRecipe.getRecipeIngList().get(2).getIngredientDesc());
-            // Log.i("StepActivity","ing step entre"+mBakingRecipe.getRecipeStepList().get(2).getStepLongDesc());
-
-            Log.i("StepActiivty", "inglist all " + mCurrentBakingRecipe.getRecipeIngList().toString());
-            Log.i("StepActiivty", "steplst all " + mCurrentBakingRecipe.getRecipeStepList().toString());
-            Log.i("StepActiivty", "fooditem " + mCurrentBakingRecipe.getBakeFoodItem().toString());
-
-
-            updateUI();
-            setPreviousNextButtonListener();
         } else if (savedInstanceState != null) {
-
-            mCurrentIndex = savedInstanceState.getInt("currentindex");
-            mCurrentBakingRecipe = savedInstanceState.getParcelable("currentrecipe");
-            Log.i(TAG, "in on create saved instance not null Current Index" + mCurrentIndex);
-            updateUI();
+            Log.i(TAG, "On Create saved instance is not null");
+            mCurrentIndex = savedInstanceState.getInt(mParcelableDetailIndex);
+            mCurrentBakingRecipe = savedInstanceState.getParcelable(mParcelableCurrentRecipeKey);
         }
 
+        setPreviousNextButtonListener();
 
 
-            /*
+    }
 
-
-
-            FragmentManager fragmentManager = getSupportFragmentManager();
-
-            RecipeStepFragment stepFragment = new RecipeStepFragment();
-            stepFragment.setCurrentBakingRecipe(mBakingRecipe);
-            stepFragment.setCurrentIndex(index);
-            fragmentManager.beginTransaction().add(R.id.stepcontainer, stepFragment).commit();
-*/
-
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateUI();
     }
 
     void updateStepState(int position) {
@@ -106,24 +110,33 @@ public class RecipeStepActivity extends AppCompatActivity {
         }
         if (mCurrentBakingRecipe != null) {
             ingListFragment.setIngArrayList(RecipeDataUtil.getIngListForDetailIndex(mCurrentBakingRecipe));
-            ingListFragment.updateListView();
         }
 
     }
 
     void setupVideoFragment() {
         VideoFragment videoFragment = (VideoFragment) getSupportFragmentManager().findFragmentById(R.id.stepVideoContainer);
+
+
         if (videoFragment == null) {
-            Log.i(TAG, "New Video Fragment Creating");
             videoFragment = new VideoFragment();
             videoFragment.setMediaUrl(mCurrentStep.getStepVideoUrl());
+            videoFragment.setThumbUrl(mCurrentStep.getStepThumbnailUrl());
             getSupportFragmentManager().beginTransaction().add(R.id.stepVideoContainer, videoFragment).commit();
+
         } else {
-            Log.i(TAG, "Video Fragment Found");
-          //  videoFragment.setMediaUrl(mCurrentStep.getStepVideoUrl());
-           // videoFragment.playVideo();
+            videoFragment.setThumbUrl(mCurrentStep.getStepThumbnailUrl());
+            videoFragment.setMediaUrl(mCurrentStep.getStepVideoUrl());
+            videoFragment.playVideo();
         }
 
+    }
+
+    void removeVideoFragment() {
+        VideoFragment videoFragment = (VideoFragment) getSupportFragmentManager().findFragmentById(R.id.stepVideoContainer);
+        if (videoFragment != null) {
+            getSupportFragmentManager().beginTransaction().remove(getSupportFragmentManager().findFragmentById(R.id.stepVideoContainer)).commitNow();
+        }
     }
 
     void setupDescFragment() {
@@ -140,21 +153,17 @@ public class RecipeStepActivity extends AppCompatActivity {
     }
 
 
-    void updateVideoUI() {
-
-        //  String videoUrl = mCurrentBakingRecipe.getRecipeStepList().get(mCurrentIndex - 1).getStepVideoUrl();
-
-
-    }
-
     void updateUI() {
         if (mCurrentIndex == 0) {
             setupIngListFragment();
+            showIngContainer();
+            mPreviousButton.setVisibility(View.INVISIBLE);
         } else {
             updateStepState(mCurrentIndex);
+            showVideoContainer();
             setupDescFragment();
             setupVideoFragment();
-            //  updateVideoUI();
+            mPreviousButton.setVisibility(View.VISIBLE);
         }
     }
 
@@ -173,7 +182,7 @@ public class RecipeStepActivity extends AppCompatActivity {
                     } else {
                         mPreviousButton.setVisibility(View.VISIBLE);
                     }
-
+                    removeVideoFragment();
                     updateUI();
 
 
@@ -187,7 +196,6 @@ public class RecipeStepActivity extends AppCompatActivity {
                 public void onClick(View v) {
                     mCurrentIndex = mCurrentIndex + 1;
 
-
                     if (mCurrentIndex + 1 == mCurrentBakingRecipe.getRecipeStepList().size()) {
                         mPreviousButton.setVisibility(View.VISIBLE);
                         mNextButton.setVisibility(View.INVISIBLE);
@@ -195,6 +203,7 @@ public class RecipeStepActivity extends AppCompatActivity {
                         mNextButton.setVisibility(View.VISIBLE);
                         mPreviousButton.setVisibility(View.VISIBLE);
                     }
+                    removeVideoFragment();
                     updateUI();
 
                 }
@@ -205,19 +214,24 @@ public class RecipeStepActivity extends AppCompatActivity {
 
     }
 
+    void showIngContainer() {
+        mIngContainer.setVisibility(View.VISIBLE);
+        mVideoContainer.setVisibility(View.GONE);
+        mDescContainer.setVisibility(View.GONE);
+    }
+
+    void showVideoContainer() {
+        mIngContainer.setVisibility(View.GONE);
+        mVideoContainer.setVisibility(View.VISIBLE);
+        mDescContainer.setVisibility(View.VISIBLE);
+    }
+
     @Override
     protected void onSaveInstanceState(Bundle outState) {
 
-        Log.i(TAG, "Setting current index on saveinstance" + mCurrentIndex);
-        outState.putParcelable("currentrecipe", mCurrentBakingRecipe);
-
-        outState.putInt("currentindex", mCurrentIndex);
+        outState.putParcelable(mParcelableCurrentRecipeKey, mCurrentBakingRecipe);
+        outState.putInt(mParcelableDetailIndex, mCurrentIndex);
         super.onSaveInstanceState(outState);
-
     }
-
-    //
-
-    //  Log.i("StepAct",url);
 
 }

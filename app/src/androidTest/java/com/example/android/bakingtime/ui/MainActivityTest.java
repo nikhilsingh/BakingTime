@@ -1,6 +1,7 @@
 package com.example.android.bakingtime.ui;
 
 
+import android.support.test.espresso.DataInteraction;
 import android.support.test.espresso.ViewInteraction;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
@@ -14,19 +15,23 @@ import com.example.android.bakingtime.R;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
+import org.hamcrest.core.IsInstanceOf;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import static android.support.test.espresso.Espresso.onData;
 import static android.support.test.espresso.Espresso.onView;
-import static android.support.test.espresso.Espresso.pressBack;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static android.support.test.espresso.matcher.ViewMatchers.withClassName;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static android.support.test.espresso.matcher.ViewMatchers.withParent;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.anything;
+import static org.hamcrest.Matchers.is;
 
 @LargeTest
 @RunWith(AndroidJUnit4.class)
@@ -37,54 +42,40 @@ public class MainActivityTest {
 
     @Test
     public void mainActivityTest() {
-        ViewInteraction appCompatTextView = onView(
-                allOf(withId(android.R.id.text1), withText("Yellow Cake"),
+        ViewInteraction recyclerView = onView(
+                allOf(withId(R.id.gv_main_selectrecipe),
                         childAtPosition(
-                                withId(R.id.gv_main_selectrecipe),
-                                2),
-                        isDisplayed()));
-        appCompatTextView.perform(click());
+                                withClassName(is("android.widget.FrameLayout")),
+                                0)));
+        recyclerView.perform(actionOnItemAtPosition(2, click()));
 
         ViewInteraction textView = onView(
-                allOf(withId(android.R.id.text1), withText("Starting prep"),
-                        childAtPosition(
-                                allOf(withId(R.id.lv_recipedetail),
-                                        childAtPosition(
-                                                withId(R.id.recipedetail_container),
-                                                0)),
-                                2),
-                        isDisplayed()));
-        textView.check(matches(withText("Starting prep")));
-
-        ViewInteraction appCompatTextView2 = onView(
-                allOf(withId(android.R.id.text1), withText("Starting prep"),
-                        childAtPosition(
-                                allOf(withId(R.id.lv_recipedetail),
-                                        withParent(withId(R.id.recipedetail_container))),
-                                2),
-                        isDisplayed()));
-        appCompatTextView2.perform(click());
-
-        ViewInteraction button = onView(
-                allOf(withId(R.id.nextbutton),
+                allOf(withId(R.id.tv_recipedetail_name), withText("YELLOW CAKE"),
                         childAtPosition(
                                 childAtPosition(
-                                        withId(R.id.stepcontainer),
+                                        IsInstanceOf.<View>instanceOf(android.widget.LinearLayout.class),
                                         0),
                                 1),
                         isDisplayed()));
-        button.check(matches(isDisplayed()));
+        textView.check(matches(withText("YELLOW CAKE")));
 
-        pressBack();
-
-        ViewInteraction appCompatTextView3 = onView(
-                allOf(withId(android.R.id.text1), withText("Recipe Introduction"),
+        ViewInteraction appCompatImageButton = onView(
+                allOf(withId(R.id.btn_nextitem),
                         childAtPosition(
-                                allOf(withId(R.id.lv_recipedetail),
-                                        withParent(withId(R.id.recipedetail_container))),
-                                1),
+                                childAtPosition(
+                                        withClassName(is("android.widget.LinearLayout")),
+                                        0),
+                                2),
                         isDisplayed()));
-        appCompatTextView3.perform(click());
+        appCompatImageButton.perform(click());
+
+        DataInteraction linearLayout = onData(anything())
+                .inAdapterView(allOf(withId(R.id.lv_recipedetail),
+                        childAtPosition(
+                                withClassName(is("android.widget.LinearLayout")),
+                                1)))
+                .atPosition(4);
+        linearLayout.perform(click());
 
     }
 

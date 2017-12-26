@@ -4,13 +4,16 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Created by nikhil on 9/8/17.
+ * Model class holding higherlevel detail of all the food item recipes available.
+ * It describes the Food Item Name , Food Item ID and Servings for the respective recipe.
  */
 
-public class BakeFoodItem implements Parcelable{
+public class BakeFoodItem implements Parcelable {
     int foodItemId;
     String foodItemName;
+    String foodImg;
     int foodItemServing;
+
 
     public BakeFoodItem() {
     }
@@ -19,6 +22,7 @@ public class BakeFoodItem implements Parcelable{
 
         foodItemId = in.readInt();
         foodItemName = in.readString();
+        foodImg=in.readString();
         foodItemServing = in.readInt();
     }
 
@@ -26,6 +30,7 @@ public class BakeFoodItem implements Parcelable{
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(foodItemId);
         dest.writeString(foodItemName);
+        dest.writeString(foodImg);
         dest.writeInt(foodItemServing);
     }
 
@@ -50,8 +55,18 @@ public class BakeFoodItem implements Parcelable{
         return foodItemId;
     }
 
+
+
     public void setFoodItemId(int foodItemId) {
         this.foodItemId = foodItemId;
+    }
+
+    public String getFoodImg() {
+        return foodImg;
+    }
+
+    public void setFoodImg(String foodImg) {
+        this.foodImg = foodImg;
     }
 
     public String getFoodItemName() {

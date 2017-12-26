@@ -15,7 +15,7 @@ import butterknife.ButterKnife;
 
 
 /**
- * A simple {@link Fragment} subclass.
+ * Fragment class to handle the recipe step descriptions.
  */
 public class StepDescFragment extends Fragment {
 
@@ -49,7 +49,6 @@ public class StepDescFragment extends Fragment {
         if(mDescTV!=null){
             mDescTV.setText(desc);
         }
-
 
     }
 }

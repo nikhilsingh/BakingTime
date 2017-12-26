@@ -1,41 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
+
+    <FrameLayout
+        android:id="@+id/tab_stepIngContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="44dp"
+
+        android:visibility="gone" />
 
     <FrameLayout
 
         android:id="@+id/stepVideoContainer"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"/>
+        android:layout_height="260dp"
+
+        android:visibility="gone" />
 
     <FrameLayout
         android:id="@+id/stepDescContainer"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"/>
+        android:layout_height="wrap_content"
+        android:layout_marginTop="260dp"
+
+        android:visibility="gone" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
         android:orientation="horizontal">
 
         <Button
             android:id="@+id/previousbutton"
             android:layout_width="0dp"
-            android:layout_height="40dp"
-            android:layout_gravity="bottom"
+            android:layout_height="48dp"
+            android:layout_marginRight="1dp"
             android:layout_weight="1"
-            android:text="PREVIOUS" />
+            android:background="@drawable/shape_btn_filledrectangle"
+            android:fontFamily="sans-serif"
+            android:text="@string/btn_previous_text"
+            android:textColor="#FFFF"
+            android:textSize="14sp"
+            android:textStyle="bold" />
 
         <Button
             android:id="@+id/nextbutton"
             android:layout_width="0dp"
-            android:layout_height="40dp"
-            android:layout_gravity="bottom"
+            android:layout_height="48dp"
+            android:layout_marginLeft="1dp"
             android:layout_weight="1"
-            android:text="NEXT" />
+            android:background="@drawable/shape_btn_filledrectangle"
+            android:fontFamily="sans-serif"
+            android:text="@string/btn_next_text"
+            android:textColor="#FFFF"
+            android:textSize="14sp"
+            android:textStyle="bold" />
     </LinearLayout>
-</LinearLayout>
+
+
+</FrameLayout>
+
