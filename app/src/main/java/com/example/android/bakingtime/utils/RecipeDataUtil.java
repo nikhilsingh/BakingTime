@@ -69,9 +69,7 @@ public class RecipeDataUtil {
             foodItemValue.put(BakingContract.FoodItem.COLUMN_SERVINGS, recipeObj.getInt(JSONKEY_SERVINGS));
 
             String foodImg=recipeObj.getString(JSONKEY_FOODIMAGE);
-            if(TextUtils.isEmpty(foodImg) && foodItemId !=2){
-                foodImg="http://img.taste.com.au/9isesBer/taste/2016/11/caramello-cake-105070-1.jpeg";
-            }
+
             foodItemValue.put(BakingContract.FoodItem.COLUMN_FOODIMAGE,foodImg);
 
             fooditemValuesArray[i] = foodItemValue;
@@ -95,7 +93,7 @@ public class RecipeDataUtil {
 
             }
 
-            int count=0;
+
             JSONArray stepArray = recipeObj.getJSONArray(JSONKEY_STEPS);
             for (int k = 0; k < stepArray.length(); k++) {
 
