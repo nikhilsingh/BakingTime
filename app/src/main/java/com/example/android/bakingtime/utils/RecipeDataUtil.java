@@ -109,7 +109,7 @@ public class RecipeDataUtil {
                 String videoUrl = stepObj.getString(JSONKEY_STEPS_VIDEOURL);
 
                 if (!TextUtils.isEmpty(thumbUrl) && thumbUrl.endsWith(".mp4") && TextUtils.isEmpty(videoUrl)) {
-                    videoUrl = thumbUrl;
+                  thumbUrl="";
                 }
 
 

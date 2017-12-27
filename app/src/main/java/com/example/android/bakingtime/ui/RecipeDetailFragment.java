@@ -9,19 +9,19 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 
 import android.widget.ImageButton;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.android.bakingtime.R;
-import com.example.android.bakingtime.adapters.RecipeDetailAdapter;
 
+import com.example.android.bakingtime.adapters.RecipeDetailAdapter;
 import com.example.android.bakingtime.model.BakingRecipe;
 import com.example.android.bakingtime.model.RecipeStep;
 import com.example.android.bakingtime.sync.BakingRecipeDBLoader;
@@ -38,16 +38,15 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
-
 /**
  * Fragment class which handles the details of a recipe.
  */
 
-public class RecipeDetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<BakingRecipe> {
+public class RecipeDetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<BakingRecipe>, RecipeDetailAdapter.RecipeDetailOnClickHandler {
 
     public static final String TAG = "RecipeDetailFragment";
     @BindView(R.id.lv_recipedetail)
-    ListView recipeDetailLV;
+    RecyclerView recipeDetailRV;
 
     ArrayList<String> mDataList;
 
@@ -79,9 +78,9 @@ public class RecipeDetailFragment extends Fragment implements LoaderManager.Load
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
         mCurrentFoodId = mCallback.getCurrentFoodId();
-        mPrefKey_FileName=getString(R.string.pref_file_name);
+        mPrefKey_FileName = getString(R.string.pref_file_name);
         SharedPreferences mSharedPref = getActivity().getSharedPreferences(mPrefKey_FileName, Context.MODE_PRIVATE);
-        mAllFoodIdSetKey=getString(R.string.key_allfoodids_set);
+        mAllFoodIdSetKey = getString(R.string.key_allfoodids_set);
         Set<String> strSet = mSharedPref.getStringSet(mAllFoodIdSetKey, new HashSet<String>());
         mAllFoodIdList = RecipeDataUtil.getAllFoodIdList(strSet);
     }
@@ -92,8 +91,11 @@ public class RecipeDetailFragment extends Fragment implements LoaderManager.Load
         View rootView = inflater.inflate(R.layout.fragment_recipe_details, container, false);
         ButterKnife.bind(this, rootView);
 
-        mRecipeAdapter = new RecipeDetailAdapter(getContext());
-        recipeDetailLV.setAdapter(mRecipeAdapter);
+
+
+        mRecipeAdapter = new RecipeDetailAdapter(this );
+        recipeDetailRV.setAdapter(mRecipeAdapter);
+        recipeDetailRV.setLayoutManager(new LinearLayoutManager(getContext()));
         if (savedInstanceState == null) {
             getCurrentRecipeFromDB(mCurrentFoodId);
         } else {
@@ -101,14 +103,15 @@ public class RecipeDetailFragment extends Fragment implements LoaderManager.Load
             setBakingRecipeData(mCurrentBakingRecipe);
         }
 
-        recipeDetailLV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+      /*  recipeDetailLV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                view.setSelected(true);
                 mCallback.onDetailClicked(position);
             }
         });
-
+*/
         mNextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -255,7 +258,7 @@ public class RecipeDetailFragment extends Fragment implements LoaderManager.Load
             mCurrentBakingRecipe = null;
         }
 
-        //   TOdo:mProgressBar.setVisibility(View.GONE);
+
         mCurrentBakingRecipe = data;
         mDetailIndex = 0;
         newCurrentRecipeDataAvailable();
@@ -270,6 +273,11 @@ public class RecipeDetailFragment extends Fragment implements LoaderManager.Load
     @Override
     public void onLoaderReset(Loader<BakingRecipe> loader) {
 
+    }
+
+    @Override
+    public void onDetailSelected(int position) {
+        mCallback.onDetailClicked(position);
     }
 
     public interface OnDetailActionListener {

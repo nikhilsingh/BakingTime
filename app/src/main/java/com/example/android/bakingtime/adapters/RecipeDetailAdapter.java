@@ -1,12 +1,10 @@
 package com.example.android.bakingtime.adapters;
 
-import android.content.Context;
-
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.example.android.bakingtime.R;
@@ -18,17 +16,48 @@ import java.util.ArrayList;
  * This includes ingredients and all the steps required for the recipe.
  */
 
-public class RecipeDetailAdapter extends BaseAdapter {
-
-    Context mContext;
+public class RecipeDetailAdapter extends RecyclerView.Adapter<RecipeDetailAdapter.RecipeDetailViewHolder> {
+public static final String TAG ="RecipeDetailAdapter";
     ArrayList<String> mData;
-
-    public RecipeDetailAdapter(Context context) {
-        mContext = context;
+    RecipeDetailOnClickHandler mDetailClickHandler;
+    int mClickedPosition=-1;
+    public RecipeDetailAdapter(RecipeDetailOnClickHandler handler) {
+        mDetailClickHandler = handler;
+        mData=new ArrayList<>();
     }
 
     @Override
-    public int getCount() {
+    public RecipeDetailViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+
+        View view = inflater.inflate(R.layout.listitem_recipe_details, parent, false);
+
+        return new RecipeDetailViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(RecipeDetailViewHolder holder, final int position) {
+        holder.shortDescTV.setText(mData.get(position));
+
+        holder.shortDescTV.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mClickedPosition=position;
+                notifyDataSetChanged();
+                mDetailClickHandler.onDetailSelected(position);
+            }
+        });
+
+        if(position==mClickedPosition){
+            holder.shortDescTV.setBackgroundResource(R.drawable.shape_btn_filledrectangle);
+        }else {
+            holder.shortDescTV.setBackgroundResource(R.drawable.shape_roundedrectangleborder);
+        }
+
+    }
+
+    @Override
+    public int getItemCount() {
         if (mData == null) {
             return 0;
         }
@@ -36,30 +65,23 @@ public class RecipeDetailAdapter extends BaseAdapter {
     }
 
     public void setDetailListData(ArrayList<String> data) {
+       Log.i(TAG,"New Data is received"+data);
         mData = data;
+        mClickedPosition=-1;
         notifyDataSetChanged();
     }
 
-    @Override
-    public Object getItem(int position) {
-        return null;
-    }
+    public class RecipeDetailViewHolder extends RecyclerView.ViewHolder {
+        TextView shortDescTV;
 
-    @Override
-    public long getItemId(int position) {
-        return 0;
-    }
-
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-
-        View listItemView = convertView;
-        if (listItemView == null) {
-            listItemView = LayoutInflater.from(mContext).inflate(R.layout.listitem_recipe_details, parent, false);
+        public RecipeDetailViewHolder(View itemView) {
+            super(itemView);
+            shortDescTV = itemView.findViewById(R.id.tv_item_shortDesc);
         }
-        TextView shortDescTV = listItemView.findViewById(R.id.tv_item_shortDesc);
-        shortDescTV.setText(mData.get(position));
-        return listItemView;
     }
 
+
+    public interface RecipeDetailOnClickHandler {
+        void onDetailSelected(int position);
+    }
 }
