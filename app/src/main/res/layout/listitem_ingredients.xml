@@ -2,8 +2,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_listitem_parent"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_margin="16dp"
+    android:layout_height="wrap_content"
+    android:background="@drawable/shape_roundedrectangleborder"
+    android:layout_margin="4dp"
     android:orientation="horizontal">
 
     <TextView

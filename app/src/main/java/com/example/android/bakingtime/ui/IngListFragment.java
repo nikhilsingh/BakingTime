@@ -3,6 +3,8 @@ package com.example.android.bakingtime.ui;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,7 +26,7 @@ import butterknife.ButterKnife;
  */
 public class IngListFragment extends Fragment {
     @BindView(R.id.ingredientList)
-    ListView mIngredientListView;
+    RecyclerView mIngredientRV;
 
     @BindString(R.string.key_ingredient_list)
     String mKey_IngList;
@@ -45,9 +47,10 @@ public class IngListFragment extends Fragment {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_ing_list, container, false);
         ButterKnife.bind(this, rootView);
+        mIngredientRV.setLayoutManager(new LinearLayoutManager(getContext()));
 
         mIngAdapter = new IngredientListAdapter(getContext(), new ArrayList<RecipeIngredient>());
-        mIngredientListView.setAdapter(mIngAdapter);
+        mIngredientRV.setAdapter(mIngAdapter);
 
         if (savedInstanceState != null) {
             mRecipeIngList = savedInstanceState.getParcelableArrayList(mKey_IngList);
